@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IO chat</title>
+    <link rel = "stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style >
+        body{
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class = "container">
+
+    <div class = "row" id = "messageArea">
+        <! col-md-4 znaci da ovaj dio zauzima 1/3 ekrana(4/12)>
+        <div class = "col-md-4">
+            <! well oznacava granicu >
+            <div class = "well">
+                <h3> Online users </h3>
+                <ul class = "list-group" id = "korisnici"> </ul>
+            </div>
+        </div>
+
+
+        <div class = "col-md-8">
+            <div class = "well" id = "chat"> </div>
+            <form id = "messageForm">
+                <div class = "form-group">
+                     <label>Enter Message</label>
+                     <textarea class = "form-control" id = "message"> </textarea>
+                     <br/>
+                     <input type="submit" class = "btn btn-primary" value = "Send Message"/>
+                 </div>
+            </form>
+
+
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+
+        var socket = io.connect();
+        var $messageForm = $('#messageForm');
+        var $message = $('#message');
+        var $chat = $('#chat');
+        var $messageArea = $('#messageArea');
+        var $korisnici = $('#korisnici');
+        var ime = "{{ ime}}";
+
+
+        $messageForm.submit(function(e){
+            e.preventDefault();
+            socket.emit('send message', $message.val());
+            $message.val('');
+        });
+
+        socket.on('new message', function(data){
+            $chat.append('<div ><strong>'+data.korisnik+'</strong>:' + data.msg + '<div>');
+        });
+
+        socket.emit('new user', ime,function(data){
+
+        });
+
+        socket.on('get users', function(data){
+            var html = '';
+            for (i = 0; i< data.length; i++){
+                html +='<li class = "list-group-item" >' + data[i]+ '</li>';
+            }
+            $korisnici.html(html);
+        });
+
+    });
+</script>
+</body>
+</html>
